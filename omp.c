@@ -1,3 +1,4 @@
+#include <omp.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -51,6 +52,7 @@ int main(int argc, char **argv) {
         }
     }
 
+    double start = omp_get_wtime();
 #pragma omp parallel num_threads(n_threads)
     for (uint32_t i = 0; i < matrix_size; i++) {
         for (uint32_t j = 0; j < matrix_size; j++) {
@@ -75,12 +77,10 @@ int main(int argc, char **argv) {
             matrix_t[i * matrix_size + j] = matrix_a[i * matrix_size + j] > avg;
         }
     }
+    double end = omp_get_wtime();
+    double elapsed = (end - start) * 1000;
 
-    printf("Matrix A:");
-    print_matrix(matrix_a, matrix_size);
-
-    printf("Matrix T:");
-    print_matrix(matrix_t, matrix_size);
+    printf("Time elapsed: %lf ms\n", elapsed);
 
     return 0;
 }

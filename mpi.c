@@ -75,9 +75,6 @@ int main(int argc, char **argv) {
             }
         }
 
-        printf("Matrix A:");
-        print_matrix(&matrix[matrix_width], matrix_width, matrix_width);
-
         int to_send_height = matrix_height + 2 * num_nodes - 2;
         to_scatter = (int *)malloc(to_send_height * matrix_width * sizeof(int));
 
@@ -103,6 +100,7 @@ int main(int argc, char **argv) {
     int *result_local_matrix = (int *)malloc(
         local_matrix_width * (local_matrix_height - 2) * sizeof(int));
 
+    double start = MPI_Wtime();
     for (int i = 1; i < local_matrix_height - 1; i++) {
         for (int j = 0; j < local_matrix_width; j++) {
             float avg = 0;
@@ -130,6 +128,8 @@ int main(int argc, char **argv) {
                 local_matrix[i * local_matrix_width + j] > avg;
         }
     }
+    double end = MPI_Wtime();
+    double elapsed = (end - start) * 1000;
 
     int *result_matrix =
         (int *)malloc(matrix_width * matrix_height * sizeof(int));
@@ -143,8 +143,7 @@ int main(int argc, char **argv) {
     MPI_Finalize();
 
     if (this_node == 0) {
-        printf("Matrix T: ");
-        print_matrix(result_matrix, matrix_width, matrix_width);
+        printf("Elapsed time: %lf ms", elapsed);
     }
 
     free(result_matrix);

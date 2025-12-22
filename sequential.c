@@ -3,24 +3,9 @@
 #include <stdlib.h>
 #include <time.h>
 
-void print_separator(uint32_t size) {
-    printf("\n-");
-    for (uint32_t i = 0; i < size; i++) {
-        printf("-----");
-    }
-    printf("\n");
-}
-
-void print_matrix(uint32_t *matrix, uint32_t matrix_size) {
-    print_separator(matrix_size);
-    for (uint32_t i = 0; i < matrix_size; i++) {
-        printf("|");
-        for (uint32_t j = 0; j < matrix_size; j++) {
-            printf(" %02u |", matrix[i * matrix_size + j]);
-        }
-
-        print_separator(matrix_size);
-    }
+double get_time_diff(clock_t start, clock_t end) {
+    clock_t diff = end - start;
+    return diff / (CLOCKS_PER_SEC / 1000.0);
 }
 
 int main(int argc, char **argv) {
@@ -47,6 +32,7 @@ int main(int argc, char **argv) {
         }
     }
 
+    clock_t start = clock();
     for (uint32_t i = 0; i < matrix_size; i++) {
         for (uint32_t j = 0; j < matrix_size; j++) {
             float avg = 0;
@@ -70,12 +56,10 @@ int main(int argc, char **argv) {
             matrix_t[i * matrix_size + j] = matrix_a[i * matrix_size + j] > avg;
         }
     }
+    double end = clock();
+    double elapsed = get_time_diff(start, end);
 
-    printf("Matrix A:");
-    print_matrix(matrix_a, matrix_size);
-
-    printf("Matrix T:");
-    print_matrix(matrix_t, matrix_size);
+    printf("Time elapsed: %lf ms\n", elapsed);
 
     return 0;
 }
