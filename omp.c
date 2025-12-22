@@ -54,6 +54,7 @@ int main(int argc, char **argv) {
 
     double start = omp_get_wtime();
 #pragma omp parallel num_threads(n_threads)
+#pragma omp for
     for (uint32_t i = 0; i < matrix_size; i++) {
         for (uint32_t j = 0; j < matrix_size; j++) {
             float avg = 0;
