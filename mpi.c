@@ -75,6 +75,9 @@ int main(int argc, char **argv) {
             }
         }
 
+        printf("Matrix A:");
+        print_matrix(&matrix[matrix_width], matrix_width, matrix_width);
+
         int to_send_height = matrix_height + 2 * num_nodes - 2;
         to_scatter = (int *)malloc(to_send_height * matrix_width * sizeof(int));
 
@@ -86,6 +89,8 @@ int main(int argc, char **argv) {
         }
 
         free(matrix);
+
+        matrix_height -= 2;
     }
 
     MPI_Scatter(to_scatter, local_matrix_width * local_matrix_height, MPI_INT,
@@ -126,13 +131,22 @@ int main(int argc, char **argv) {
         }
     }
 
-    printf("Node %d", this_node);
-    print_matrix(result_local_matrix, local_matrix_width,
-                 local_matrix_height - 2);
+    int *result_matrix =
+        (int *)malloc(matrix_width * matrix_height * sizeof(int));
+
+    MPI_Gather(result_local_matrix, local_matrix_width * rows_per_node, MPI_INT,
+               result_matrix, local_matrix_width * rows_per_node, MPI_INT, 0,
+               MPI_COMM_WORLD);
 
     free(local_matrix);
 
     MPI_Finalize();
 
+    if (this_node == 0) {
+        printf("Matrix T: ");
+        print_matrix(result_matrix, matrix_width, matrix_width);
+    }
+
+    free(result_matrix);
     return 0;
 }
