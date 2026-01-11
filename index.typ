@@ -37,6 +37,7 @@ L'algoritmo ideato effettua i seguenti passaggi:
 4. I singoli nodi effettuano il calcolo di $T$ nella loro sottomatrice $m times n$, la prima e l'ultima riga sono utilizzate per i valori dell'intorno nel caso particolare in cui una cella sia al bordo della sottomatrice
 5. Il risultato finale è riassemblato tramite una MPI_Gather, scartando eventuali valori ridondanti
 I valori speciali $-1$ sono utilizzati dal sistema come valori invalidi, in questo caso il valore non viene sommato e il fattore di divisione per la media è opportunamente modificato
+#image("ScatterMPI.svg", alt: "Schema dell'algoritmo di divisone delle sottomatrici", width: auto)
 = Soluzione OMP
 ==
 Al contrario di MPI, OMP è un sistema a memoria condivisa, non è necessario quindi effettuare particolari operazioni per la divisone delle sottomatrici in quanto ogni nodo ha accesso a tutti i valori della matrice originaria.\
@@ -46,4 +47,9 @@ L'algoritmo è quello di una soluzione sequenziale, con l'aggiunta delle opportu
 Sono inoltre disponibili direttive per indicare quali variabili sono condivise e private per ogni thread, ma in generale il compilatore riesce a dedurle, e in questo caso non impattano significativamente sulle performace.
 = Analisi della scalabilità
 == 
-I test della weak e strong scalability sono stati eseguiti con una dimensione della matrice pari a 4096, il numero di threads o nodi varia da 1 a 32
+#image("ScalabilitaStrong.png", alt: "Grafico della strong scalability", width: auto)
+#image("ScalabilitaWeak.png", alt: "Grafico della weak scalability", width: auto)
+I test della weak e strong scalability sono stati eseguiti con una dimensione della matrice pari a 4096, il numero di threads/nodi varia da 1 a 32
+- L'analisi della scalabilita strong mostra, come previsto, un andamento asintotico dello speedup in quanto il programma è limitato da una sezione non parallelizzabile per la creazione della matrice A e dalla raccolta dei risultati
+- L'analisi della scalabilita weak mostra un andamento lineare, in entrambi i casi le rette hanno coefficienti angolari inferiori a 1, sempre a causa delle sezioni non parallelizzabili del codice
+- In entrambe le analisi la soluzione OMP risulta più performante dato che non è necessario effettuare operazioni di comunicazione tra i nodi, riducendo la complessita algoritmica e evitando operazioni di rete con un elevato costo
