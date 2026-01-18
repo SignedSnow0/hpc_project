@@ -4,26 +4,6 @@
 #include <string.h>
 #include <time.h>
 
-void print_separator(int length) {
-    printf("\n-");
-    for (int i = 0; i < length; i++) {
-        printf("-----");
-    }
-    printf("\n");
-}
-
-void print_matrix(int *matrix, int matrix_width, int matrix_height) {
-    print_separator(matrix_width);
-    for (int i = 0; i < matrix_height; i++) {
-        printf("|");
-        for (int j = 0; j < matrix_width; j++) {
-            printf(" %02d |", matrix[i * matrix_width + j]);
-        }
-
-        print_separator(matrix_width);
-    }
-}
-
 int smallest_multiple(int n, int x) {
     if (n % x == 0) {
         return n;
@@ -58,6 +38,8 @@ int main(int argc, char **argv) {
     int *to_scatter;
     int *local_matrix =
         (int *)malloc(local_matrix_width * local_matrix_height * sizeof(int));
+
+    double start = MPI_Wtime();
 
     if (this_node == 0) {
         srand(time(0));
@@ -100,7 +82,6 @@ int main(int argc, char **argv) {
     int *result_local_matrix = (int *)malloc(
         local_matrix_width * (local_matrix_height - 2) * sizeof(int));
 
-    double start = MPI_Wtime();
     for (int i = 1; i < local_matrix_height - 1; i++) {
         for (int j = 0; j < local_matrix_width; j++) {
             float avg = 0;
@@ -128,8 +109,6 @@ int main(int argc, char **argv) {
                 local_matrix[i * local_matrix_width + j] > avg;
         }
     }
-    double end = MPI_Wtime();
-    double elapsed = (end - start) * 1000;
 
     int *result_matrix =
         (int *)malloc(matrix_width * matrix_height * sizeof(int));
@@ -138,12 +117,15 @@ int main(int argc, char **argv) {
                result_matrix, local_matrix_width * rows_per_node, MPI_INT, 0,
                MPI_COMM_WORLD);
 
+    double end = MPI_Wtime();
+    double elapsed = (end - start) * 1000;
+
     free(local_matrix);
 
     MPI_Finalize();
 
     if (this_node == 0) {
-        printf("Elapsed time: %lf ms", elapsed);
+        printf("Nodes: %d Elapsed time: %lf ms\n", num_nodes, elapsed);
     }
 
     free(result_matrix);

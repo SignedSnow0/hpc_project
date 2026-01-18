@@ -2,3 +2,6 @@
 sequential
 mpi
 omp
+*.out
+*.err
+*.results

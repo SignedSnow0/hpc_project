@@ -4,26 +4,6 @@
 #include <stdlib.h>
 #include <time.h>
 
-void print_separator(uint32_t size) {
-    printf("\n-");
-    for (uint32_t i = 0; i < size; i++) {
-        printf("-----");
-    }
-    printf("\n");
-}
-
-void print_matrix(uint32_t *matrix, uint32_t matrix_size) {
-    print_separator(matrix_size);
-    for (uint32_t i = 0; i < matrix_size; i++) {
-        printf("|");
-        for (uint32_t j = 0; j < matrix_size; j++) {
-            printf(" %02u |", matrix[i * matrix_size + j]);
-        }
-
-        print_separator(matrix_size);
-    }
-}
-
 int main(int argc, char **argv) {
     // Argument parsing
     if (argc != 3) {
@@ -40,6 +20,8 @@ int main(int argc, char **argv) {
         return 1;
     }
 
+    double start = omp_get_wtime();
+
     // Matrix initialization
     srand(time(NULL));
     uint32_t *matrix_a =
@@ -52,8 +34,7 @@ int main(int argc, char **argv) {
         }
     }
 
-    double start = omp_get_wtime();
-#pragma omp parallel num_threads(n_threads)
+#pragma omp parallel num_threads(n_threads) shared(matrix_a, matrix_t, matrix_size)
 #pragma omp for
     for (uint32_t i = 0; i < matrix_size; i++) {
         for (uint32_t j = 0; j < matrix_size; j++) {
@@ -81,7 +62,7 @@ int main(int argc, char **argv) {
     double end = omp_get_wtime();
     double elapsed = (end - start) * 1000;
 
-    printf("Time elapsed: %lf ms\n", elapsed);
+    printf("Threads: %u Time elapsed: %lf ms\n", n_threads, elapsed);
 
     return 0;
 }
